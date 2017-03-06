@@ -14,16 +14,15 @@ Player::Player(Side side) {
      * precalculating things, etc.) However, remember that you will only have
      * 30 seconds.
      */
-    cerr << "Initializing..." << endl;
     board = new Board();
     mySide = side;
-	cerr << "Finished initializing!" << endl;
 }
 
 /*
  * Destructor for the player.
  */
 Player::~Player() {
+	delete board;
 }
 
 /*
@@ -57,15 +56,11 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
 				Move *m = new Move(i, j);
 				if (board->checkMove(m, mySide))
 				{
+					board->doMove(m, mySide);
 					return m;
 				}
 			}
 		}
 	}
-
-    /*
-     * TODO: Implement how moves your AI should play here. You should first
-     * process the opponent's opponents move before calculating your own move
-     */
     return nullptr;
 }
