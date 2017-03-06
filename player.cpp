@@ -14,7 +14,7 @@ Player::Player(Side side) {
      * precalculating things, etc.) However, remember that you will only have
      * 30 seconds.
      */
-     std::cout << "Initializing..." << std::endl;
+     std::cerr << "Initializing..." << std::endl;
 }
 
 /*
