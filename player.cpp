@@ -14,14 +14,15 @@ Player::Player(Side side) {
      * precalculating things, etc.) However, remember that you will only have
      * 30 seconds.
      */
-     std::cerr << "Initializing..." << std::endl;
+    cerr << "Initializing..." << endl;
+    board = new Board();
+    mySide = side;
 }
 
 /*
  * Destructor for the player.
  */
 Player::~Player() {
-	std::cout << "Destructing..." << std::endl;
 }
 
 /*
