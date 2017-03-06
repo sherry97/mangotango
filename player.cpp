@@ -1,6 +1,8 @@
 #include "player.hpp"
 
-#define CORNER_BONUS 100
+#define CORNER_BONUS 3
+#define NEAR_CORNER_DEDUCTION -3
+#define EDGE_BONUS 2
 
 /*
  * Constructor for the player; initialize everything here. The side your AI is
@@ -43,6 +45,19 @@ int Player::evaluate(Move *m, Side side, Side other)
 	int score = cpy->count(side) - cpy->count(other);
 	score += CORNER_BONUS * (int(cpy->get(side, 0, 0)) + int(cpy->get(side, 7, 0)) 
 		+ int(cpy->get(side, 0, 7)) + int(cpy->get(side, 7, 7)));
+	for (int i = 0; i < 8; i++)
+	{
+		score += EDGE_BONUS * (int(cpy->get(side, 0, i)) + int(cpy->get(side, 7, i))
+			+ int(cpy->get(side, i, 0)) + int(cpy->get(side, i, 7)));
+	}
+	score += NEAR_CORNER_DEDUCTION * (int(cpy->get(side, 0, 1))
+		+ int(cpy->get(side, 1, 0)) + int(cpy->get(side, 1, 1)));
+	score += NEAR_CORNER_DEDUCTION * (int(cpy->get(side, 0, 6))
+		+ int(cpy->get(side, 1, 6)) + int(cpy->get(side, 1, 7)));
+	score += NEAR_CORNER_DEDUCTION * (int(cpy->get(side, 6, 0))
+		+ int(cpy->get(side, 6, 1)) + int(cpy->get(side, 7, 1)));
+	score += NEAR_CORNER_DEDUCTION * (int(cpy->get(side, 6, 6))
+		+ int(cpy->get(side, 6, 7)) + int(cpy->get(side, 7, 6)));
 	delete cpy;
 	return score;
 }
