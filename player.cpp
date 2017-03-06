@@ -17,6 +17,7 @@ Player::Player(Side side) {
     cerr << "Initializing..." << endl;
     board = new Board();
     mySide = side;
+	cerr << "Finished initializing!" << endl;
 }
 
 /*
@@ -40,7 +41,7 @@ Player::~Player() {
  */
 Move *Player::doMove(Move *opponentsMove, int msLeft) {
 
-    Side other = (side == BLACK) ? WHITE : BLACK;
+    Side other = (mySide == BLACK) ? WHITE : BLACK;
 	board->doMove(opponentsMove, other);
 	
 	if (board->isDone())
@@ -54,7 +55,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
 			for (int j = 0; j < 8; j++)
 			{
 				Move *m = new Move(i, j);
-				if (board->checkMove(Move, mySide))
+				if (board->checkMove(m, mySide))
 				{
 					return m;
 				}

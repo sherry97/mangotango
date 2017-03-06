@@ -17,7 +17,7 @@ public:
     // Flag to tell if the player is running within the test_minimax context
     bool testingMinimax;
     Board * board;
-    Size mySize;
+    Side mySide;
 };
 
 #endif
