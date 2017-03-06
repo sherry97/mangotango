@@ -1,5 +1,7 @@
 #include "player.hpp"
 
+#define CORNER_BONUS 100
+
 /*
  * Constructor for the player; initialize everything here. The side your AI is
  * on (BLACK or WHITE) is passed in as "side". The constructor must finish
@@ -14,6 +16,7 @@ Player::Player(Side side) {
      * precalculating things, etc.) However, remember that you will only have
      * 30 seconds.
      */
+    cerr << "Testing side: " << side << endl;
     board = new Board();
     mySide = side;
 }
@@ -23,6 +26,25 @@ Player::Player(Side side) {
  */
 Player::~Player() {
 	delete board;
+}
+
+/*
+ * @brief helper function to evaluate heuristic score of making given move
+ * 
+ * @param m move to make
+ * @param side
+ * 
+ * @return int value of score of move
+ */
+int Player::evaluate(Move *m, Side side, Side other)
+{
+	Board *cpy = board->copy();
+	cpy->doMove(m, side);
+	int score = cpy->count(side) - cpy->count(other);
+	score += CORNER_BONUS * (int(cpy->get(side, 0, 0)) + int(cpy->get(side, 7, 0)) 
+		+ int(cpy->get(side, 0, 7)) + int(cpy->get(side, 7, 7)));
+	delete cpy;
+	return score;
 }
 
 /*
@@ -43,6 +65,9 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     Side other = (mySide == BLACK) ? WHITE : BLACK;
 	board->doMove(opponentsMove, other);
 	
+	Move *bestMove = new Move(-1, -1);
+	int bestMoveScore = numeric_limits<int>::min();
+	
 	if (board->isDone())
 	{
 		return nullptr;
@@ -54,13 +79,27 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
 			for (int j = 0; j < 8; j++)
 			{
 				Move *m = new Move(i, j);
-				if (board->checkMove(m, mySide))
+				if (!board->checkMove(m, mySide))
 				{
-					board->doMove(m, mySide);
-					return m;
+					continue;
+				}
+				int score = evaluate(m, mySide, other);
+				if (score > bestMoveScore)
+				{
+					bestMoveScore = score;
+					bestMove = m;
 				}
 			}
 		}
 	}
-    return nullptr;
+	
+	if (bestMoveScore > numeric_limits<int>::min())
+	{
+		board->doMove(bestMove, mySide);
+		return bestMove;
+	}
+	else
+	{
+		return nullptr;
+	}
 }
