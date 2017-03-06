@@ -38,6 +38,32 @@ Player::~Player() {
  * return nullptr.
  */
 Move *Player::doMove(Move *opponentsMove, int msLeft) {
+
+    Side other = (side == BLACK) ? WHITE : BLACK;
+	board->doMove(opponentsMove, other);
+	
+	if (board->isDone())
+	{
+		return nullptr;
+	}
+	if (board->hasMoves(mySide))
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				Move *m = new Move(i, j);
+				if (board->checkMove(Move, mySide))
+				{
+					return Move;
+				}
+			}
+		}
+	}
+	else
+	{
+		return nullptr;
+	}
     /*
      * TODO: Implement how moves your AI should play here. You should first
      * process the opponent's opponents move before calculating your own move
