@@ -3,6 +3,7 @@
 #define CORNER_BONUS 3
 #define NEAR_CORNER_DEDUCTION -3
 #define EDGE_BONUS 2
+#define MINIMAX_SIM_DEPTH 2
 
 /*
  * Constructor for the player; initialize everything here. The side your AI is
@@ -38,9 +39,8 @@ Player::~Player() {
  * 
  * @return int value of score of move
  */
-int Player::evaluate(Move *m, Side side, Side other)
+int Player::evaluate_heuristic(Move *m, Side side, Side other, Board *cpy)
 {
-	Board *cpy = board->copy();
 	cpy->doMove(m, side);
 	int score = cpy->count(side) - cpy->count(other);
 	score += CORNER_BONUS * (int(cpy->get(side, 0, 0)) + int(cpy->get(side, 7, 0)) 
@@ -63,6 +63,41 @@ int Player::evaluate(Move *m, Side side, Side other)
 }
 
 /*
+ * @brief minimax helper function to simulate next moves
+ * 
+ * @return minimum score possible
+ */
+int Player::evaluate_minimax(Move *m, Side side, Side other, Board *cpy, int level)
+{
+	cpy->doMove(m, side);
+	if (level == 1)
+	{
+		return cpy->count(other) - cpy->count(side);
+	}
+	else
+	{
+		int minScore = numeric_limits<int>::max();
+		for (int i = 0; i < 8; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				Move *newMove = new Move(i, j);
+				if (!cpy->checkMove(newMove, other))
+				{
+					continue;
+				}
+				int score = evaluate_minimax(newMove, other, side, cpy->copy(), level - 1);
+				if (score < minScore)
+				{
+					minScore = score;
+				}
+			}
+		}
+		return minScore;
+	}
+}
+
+/*
  * Compute the next move given the opponent's last move. Your AI is
  * expected to keep track of the board on its own. If this is the first move,
  * or if the opponent passed on the last move, then opponentsMove will be
@@ -80,7 +115,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
     Side other = (mySide == BLACK) ? WHITE : BLACK;
 	board->doMove(opponentsMove, other);
 	
-	Move *bestMove = new Move(-1, -1);
+	Move *bestMove = nullptr;
 	int bestMoveScore = numeric_limits<int>::min();
 	
 	if (board->isDone())
@@ -98,7 +133,11 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
 				{
 					continue;
 				}
-				int score = evaluate(m, mySide, other);
+				int score;
+				if (!testingMinimax)
+					score = evaluate_heuristic(m, mySide, other, board->copy());
+				else
+					score = evaluate_minimax(m, mySide, other, board->copy(), MINIMAX_SIM_DEPTH);
 				if (score > bestMoveScore)
 				{
 					bestMoveScore = score;
