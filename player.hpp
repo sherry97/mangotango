@@ -14,7 +14,7 @@ public:
     ~Player();
 
 	int evaluate_heuristic(Move *m, Side side, Side other, Board *cpy);
-	int evaluate_minimax(Move *m, Side side, Side other, Board *cpy, int level);
+	int evaluate_minimax(Move *m, Side side, Side other, Board *cpy, int level, int alpha, int beta);
     Move *doMove(Move *opponentsMove, int msLeft);
 
     // Flag to tell if the player is running within the test_minimax context

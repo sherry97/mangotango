@@ -1,9 +1,9 @@
 #include "player.hpp"
 
-#define CORNER_BONUS 3
-#define NEAR_CORNER_DEDUCTION -3
-#define EDGE_BONUS 2
-#define MINIMAX_SIM_DEPTH 2
+#define CORNER_BONUS 10
+#define NEAR_CORNER_DEDUCTION -5
+#define EDGE_BONUS 5
+#define MINIMAX_SIM_DEPTH 10
 
 /*
  * Constructor for the player; initialize everything here. The side your AI is
@@ -67,15 +67,16 @@ int Player::evaluate_heuristic(Move *m, Side side, Side other, Board *cpy)
  * 
  * @return minimum score possible
  */
-int Player::evaluate_minimax(Move *m, Side side, Side other, Board *cpy, int level)
+int Player::evaluate_minimax(Move *m, Side side, Side other, Board *cpy, int level, int alpha, int beta)
 {
 	cpy->doMove(m, side);
-	if (level == 1)
+	if (level == 1 || cpy->isDone())
 	{
-		return cpy->count(other) - cpy->count(side);
+		return cpy->count(side) - cpy->count(other);
 	}
 	else
 	{
+		if (level % 2 == 1){
 		int minScore = numeric_limits<int>::max();
 		for (int i = 0; i < 8; i++)
 		{
@@ -86,14 +87,47 @@ int Player::evaluate_minimax(Move *m, Side side, Side other, Board *cpy, int lev
 				{
 					continue;
 				}
-				int score = evaluate_minimax(newMove, other, side, cpy->copy(), level - 1);
+				int score = evaluate_minimax(newMove, other, side, cpy->copy(), level - 1, alpha, beta);
 				if (score < minScore)
 				{
 					minScore = score;
+					beta = min(beta, minScore);
+					if (beta <= alpha)
+					{
+						i = 8;
+						j = 8;
+					}
 				}
 			}
 		}
 		return minScore;
+		}
+		else {
+		int minScore = numeric_limits<int>::min();
+		for (int i = 0; i < 8; i++)
+		{
+			for (int j = 0; j < 8; j++)
+			{
+				Move *newMove = new Move(i, j);
+				if (!cpy->checkMove(newMove, other))
+				{
+					continue;
+				}
+				int score = evaluate_minimax(newMove, other, side, cpy->copy(), level - 1, alpha, beta);
+				if (score > minScore)
+				{
+					minScore = score;
+					alpha = max(alpha, minScore);
+					if (beta <= alpha)
+					{
+						i = 8;
+						j = 8;
+					}
+				}
+			}
+		}
+		return minScore;
+		}
 	}
 }
 
@@ -137,7 +171,7 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
 				if (!testingMinimax)
 					score = evaluate_heuristic(m, mySide, other, board->copy());
 				else
-					score = evaluate_minimax(m, mySide, other, board->copy(), MINIMAX_SIM_DEPTH);
+					score = evaluate_minimax(m, mySide, other, board->copy(), MINIMAX_SIM_DEPTH, numeric_limits<int>::min(), numeric_limits<int>::max());
 				if (score > bestMoveScore)
 				{
 					bestMoveScore = score;
@@ -157,3 +191,5 @@ Move *Player::doMove(Move *opponentsMove, int msLeft) {
 		return nullptr;
 	}
 }
+ 
+
